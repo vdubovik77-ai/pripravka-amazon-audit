@@ -1,0 +1,2642 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pripravka Amazon PL / UA Product Cards</title>
+    <style>
+      :root { --ink:#151515; --muted:#625c54; --line:#ddd6c9; --paper:#fbfaf6; --panel:#fff; --black:#151515; --gold:#d6a51f; --red:#b94632; --green:#4f6f52; --ok:#247348; --warn:#a86612; --shadow:0 16px 38px rgba(33,28,20,.11); }
+      * { box-sizing:border-box; }
+      body { margin:0; font-family:Arial,"Arial Unicode MS",system-ui,sans-serif; background:var(--paper); color:var(--ink); }
+      a { color:inherit; }
+      .top-strip { height:12px; background:linear-gradient(90deg,var(--gold),var(--red),var(--green)); }
+      .page { width:min(1500px,calc(100% - 38px)); margin:0 auto; padding:26px 0 52px; }
+      header { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:22px; align-items:end; margin-bottom:18px; }
+      h1 { margin:0; font-size:clamp(34px,4vw,58px); line-height:1; letter-spacing:0; }
+      .lead { max-width:960px; margin:10px 0 0; color:var(--muted); font-size:18px; line-height:1.45; }
+      .source { display:grid; gap:7px; min-width:310px; padding:14px 16px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--muted); font-size:14px; }
+      .source strong { color:var(--ink); }
+      .controls { position:sticky; top:0; z-index:10; display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:18px; padding:12px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.94); box-shadow:0 8px 20px rgba(31,26,18,.08); backdrop-filter:blur(10px); }
+      button,.button { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 14px; border:1px solid var(--black); border-radius:8px; background:var(--black); color:#fff; font:inherit; font-size:14px; font-weight:800; text-decoration:none; cursor:pointer; }
+      button.secondary { border-color:var(--line); background:#fff; color:var(--ink); }
+      .status { margin-left:auto; color:var(--muted); font-size:14px; font-weight:800; }
+      .audit-panel { display:grid; gap:8px; margin-bottom:18px; padding:14px 16px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+      .audit-panel h2 { margin:0; font-size:20px; }
+      .audit-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:0; padding:0; list-style:none; }
+      .audit-list li { padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#faf8f2; color:var(--muted); font-size:14px; }
+      .ok strong { color:var(--ok); } .warn strong { color:var(--warn); }
+      .products { display:grid; gap:18px; }
+      .product-card { display:grid; grid-template-columns:minmax(280px,32%) minmax(0,1fr); overflow:hidden; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:var(--shadow); }
+      .pack { display:grid; grid-template-rows:auto 1fr auto; border-right:1px solid var(--line); background:linear-gradient(180deg,#fff,#f3efe8); }
+      .pack-top { display:flex; flex-wrap:wrap; gap:8px; padding:16px 16px 0; }
+      .tag { display:inline-flex; align-items:center; min-height:30px; padding:6px 10px; border-radius:999px; background:var(--black); color:#fff; font-size:12px; font-weight:900; }
+      .tag.light { border:1px solid var(--line); background:#fff; color:var(--ink); }
+      figure { display:grid; place-items:center; margin:0; padding:20px; }
+      figure img { width:min(100%,420px); max-height:430px; object-fit:contain; mix-blend-mode:multiply; }
+      .pack-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; padding:0 16px 16px; }
+      .pack-meta div { min-height:58px; padding:10px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+      .pack-meta span { display:block; margin-bottom:3px; color:var(--muted); font-size:11px; font-weight:900; text-transform:uppercase; }
+      .pack-meta strong { display:block; overflow-wrap:anywhere; font-size:15px; }
+      .translation { display:grid; min-width:0; padding:18px; }
+      .card-head { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:start; margin-bottom:14px; }
+      .card-head h2 { margin:0; font-size:clamp(20px,2vw,30px); line-height:1.12; letter-spacing:0; }
+      table { width:100%; border-collapse:collapse; table-layout:fixed; border:1px solid var(--line); }
+      th,td { border:1px solid var(--line); padding:11px 12px; vertical-align:top; overflow-wrap:anywhere; line-height:1.32; }
+      th { background:var(--black); color:var(--gold); text-align:left; font-size:13px; text-transform:uppercase; }
+      td { background:#fff; font-size:15px; }
+      tr:nth-child(even) td { background:#f8f4ec; }
+      .section-col { width:19%; font-weight:900; }
+      .image-ocr { display:grid; gap:10px; margin-top:14px; padding:14px; border:1px solid var(--line); border-radius:8px; background:#fcfaf5; }
+      .image-ocr h3 { margin:0; font-size:18px; line-height:1.2; }
+      .ocr-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; }
+      .ocr-box { padding:12px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+      .ocr-box span { display:block; margin-bottom:7px; color:var(--muted); font-size:11px; font-weight:900; text-transform:uppercase; }
+      .ocr-box p { margin:0; line-height:1.38; white-space:pre-line; }
+      .ocr-note { margin:0; color:var(--muted); font-size:13px; line-height:1.35; }
+      body.editing .editable { outline:2px dashed rgba(214,165,31,.75); outline-offset:3px; cursor:text; }
+      body.editing .editable:focus { outline:3px solid var(--gold); background:#fffdf4; }
+      footer { margin-top:24px; color:var(--muted); font-size:13px; line-height:1.45; }
+      @media(max-width:980px){ header,.product-card,.card-head{grid-template-columns:1fr} .source{min-width:0} .pack{border-right:0;border-bottom:1px solid var(--line)} .audit-list,.ocr-grid{grid-template-columns:1fr} }
+      @media(max-width:640px){ .page{width:min(100% - 28px,720px);padding-top:20px} .controls{position:static} .status{flex-basis:100%;margin-left:0} .pack-meta{grid-template-columns:1fr} table,thead,tbody,tr,th,td{display:block;width:100%} thead{display:none} td::before{display:block;margin-bottom:4px;color:var(--muted);font-size:11px;font-weight:900;text-transform:uppercase} td:nth-child(1)::before{content:"Sekcja"} td:nth-child(2)::before{content:"Polski tekst"} td:nth-child(3)::before{content:"Український переклад"} }
+    </style>
+  </head>
+  <body>
+    <div class="top-strip" aria-hidden="true"></div>
+    <main class="page">
+      <header>
+        <div>
+          <h1>Pripravka Amazon PL / UA</h1>
+          <p class="lead">Картки Amazon Pripravka: фото пачки поруч із таблицею польського тексту й українського перекладу. Окремий OCR-блок містить текст, розпізнаний з головного зображення упаковки.</p>
+        </div>
+        <aside class="source">
+          <strong>Źródło: Amazon.pl</strong>
+          <span>Перевірено: 2026-06-03</span>
+          <span>Карток: 39</span>
+          <span>Фото: 39</span>
+        </aside>
+      </header>
+      <section class="controls">
+        <button id="editToggle" type="button">Увімкнути редагування</button>
+        <button class="secondary" id="runAudit" type="button">Провести аудит</button>
+        <button class="secondary" id="exportHtml" type="button">Експортувати HTML</button>
+        <button class="secondary" id="resetEdits" type="button">Скинути правки</button>
+        <button class="secondary" type="button" onclick="window.print()">Друк / PDF</button>
+        <span class="status" id="status">Режим перегляду</span>
+      </section>
+      <section class="audit-panel"><h2>Аудит</h2><ul class="audit-list" id="auditList"></ul></section>
+      <section class="products">
+            <article class="product-card" data-asin="B0GWQ6SCNR" data-category="Exclusive Professional">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Exclusive Professional</span>
+                  <span class="tag light">B0GWQ6SCNR</span>
+                </div>
+                <figure><img src="assets/B0GWQ6SCNR.jpg" alt="Pripravka Przyprawa do Kurczaka po Staropolsku 40g Exclusive Professional z Czarnuszką – Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czosnek Majeranek Chili, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQ6SCNR</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Exclusive Professional</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Kurczaka po Staropolsku 40g Exclusive Professional z Czarnuszką – Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czosnek Majeranek Chili, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Staropolsku-Professional-Czarnuszk%C4%85/dp/B0GWQ6SCNR?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Kurczaka po Staropolsku 40g Exclusive Professional z Czarnuszką – Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czosnek Majeranek Chili, Doypack Zip</td><td class="editable">Pripravka приправа до курки по-старопольськи 40 г Exclusive Professional з чорнушкою - натуральна суміш спецій, парова стерилізація, часник майоран чилі, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czosnek Majeranek Chili, Doypack Zip</td><td class="editable">натуральна суміш спецій, парова стерилізація, часник майоран чилі, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Exclusive Professional
+Naturalna przyprawa grubo mielona
+Do kurczaka po staropolsku
+z czarnuszką
+Bez dodatku soli
+7 etapów oczyszczania
+Propozycja podania
+40 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Exclusive Professional
+Натуральна крупномелена приправа
+До курки по-старопольськи
+з чорнушкою
+Без додавання солі
+7 етапів очищення
+Приклад подавання
+40 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQB6141" data-category="Exclusive Professional">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Exclusive Professional</span>
+                  <span class="tag light">B0GWQB6141</span>
+                </div>
+                <figure><img src="assets/B0GWQB6141.jpg" alt="Pripravka Naturalna Przyprawa do Ryb bez Soli Exclusive Professional 45g - Mieszanka z Cytryną i Bazylią, Sterylizowana Parą, Bez Chemii i Konserwantów, Duże Opakowanie Doypack z Zamknięciem Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQB6141</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Exclusive Professional</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Naturalna Przyprawa do Ryb bez Soli Exclusive Professional 45g - Mieszanka z Cytryną i Bazylią, Sterylizowana Parą, Bez Chemii i Konserwantów, Duże Opakowanie Doypack z Zamknięciem Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Naturalna-Przyprawa-Exclusive-Professional/dp/B0GWQB6141?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Naturalna Przyprawa do Ryb bez Soli Exclusive Professional 45g - Mieszanka z Cytryną i Bazylią, Sterylizowana Parą, Bez Chemii i Konserwantów, Duże Opakowanie Doypack z Zamknięciem Zip</td><td class="editable">Pripravka натуральна приправа до риби без солі Exclusive Professional 45 г - суміш з лимоном і базиліком, стерилізована парою, без хімії та консервантів, велика упаковка дойпак із zip-застібкою</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Mieszanka z Cytryną i Bazylią, Sterylizowana Parą, Bez Chemii i Konserwantów, Duże Opakowanie Doypack z Zamknięciem Zip</td><td class="editable">суміш з лимоном і базиліком, стерилізована парою, без хімії та консервантів, велика упаковка дойпак із zip-застібкою</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Exclusive Professional
+Naturalna przyprawa grubo mielona
+Do ryb
+ze skórką cytrynową i bazylią
+Bez dodatku soli
+Perła Rynku 2025
+7 etapów oczyszczania
+Propozycja podania
+45 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Exclusive Professional
+Натуральна крупномелена приправа
+До риби
+з лимонною цедрою та базиліком
+Без додавання солі
+Перлина ринку 2025
+7 етапів очищення
+Приклад подавання
+45 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQ1VXWY" data-category="Exclusive Professional">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Exclusive Professional</span>
+                  <span class="tag light">B0GWQ1VXWY</span>
+                </div>
+                <figure><img src="assets/B0GWQ1VXWY.jpg" alt="Pripravka Przyprawa do Szaszłyków Exclusive Professional 45g – Naturalna Mieszanka z Rozmarynem i Czosnkiem, Idealna na Grill, Sterylizacja Parowa, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQ1VXWY</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Exclusive Professional</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Szaszłyków Exclusive Professional 45g – Naturalna Mieszanka z Rozmarynem i Czosnkiem, Idealna na Grill, Sterylizacja Parowa, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Szaszlyk%C3%B3w-Exclusive-Professional/dp/B0GWQ1VXWY?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Szaszłyków Exclusive Professional 45g – Naturalna Mieszanka z Rozmarynem i Czosnkiem, Idealna na Grill, Sterylizacja Parowa, Doypack Zip</td><td class="editable">Pripravka приправа до шашликів Exclusive Professional 45 г - натуральна суміш з розмарином і часником, ідеальна на гриль, парова стерилізація, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka z Rozmarynem i Czosnkiem, Idealna na Grill, Sterylizacja Parowa, Doypack Zip</td><td class="editable">натуральна суміш з розмарином і часником, ідеальна на гриль, парова стерилізація, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Exclusive Professional
+Naturalna przyprawa grubo mielona
+Do szaszłyków
+z rozmarynem i czosnkiem
+Bez dodatku soli
+7 etapów oczyszczania
+Propozycja podania
+45 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Exclusive Professional
+Натуральна крупномелена приправа
+До шашликів
+з розмарином і часником
+Без додавання солі
+7 етапів очищення
+Приклад подавання
+45 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQC4PNQ" data-category="Exclusive Professional">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Exclusive Professional</span>
+                  <span class="tag light">B0GWQC4PNQ</span>
+                </div>
+                <figure><img src="assets/B0GWQC4PNQ.jpg" alt="Pripravka Exclusive Professional 50g Naturalna Przyprawa do Kurczaka z Wędzoną Papryką – Aromatyczna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQC4PNQ</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Exclusive Professional</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Exclusive Professional 50g Naturalna Przyprawa do Kurczaka z Wędzoną Papryką – Aromatyczna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Exclusive-Professional-Naturalna-Przyprawa/dp/B0GWQC4PNQ?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Exclusive Professional 50g Naturalna Przyprawa do Kurczaka z Wędzoną Papryką – Aromatyczna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Doypack Zip</td><td class="editable">Pripravka Exclusive Professional 50 г натуральна приправа до курки з копченою паприкою - ароматна суміш спецій, парова стерилізація, чистий склад, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Aromatyczna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Doypack Zip</td><td class="editable">ароматна суміш спецій, парова стерилізація, чистий склад, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Exclusive Professional
+Naturalna przyprawa grubo mielona
+Do kurczaka
+z wędzoną papryką
+Bez dodatku soli
+Perła Rynku 2025
+7 etapów oczyszczania
+Propozycja podania
+50 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Exclusive Professional
+Натуральна крупномелена приправа
+До курки
+з копченою паприкою
+Без додавання солі
+Перлина ринку 2025
+7 етапів очищення
+Приклад подавання
+50 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWPYCVN6" data-category="Exclusive Professional">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Exclusive Professional</span>
+                  <span class="tag light">B0GWPYCVN6</span>
+                </div>
+                <figure><img src="assets/B0GWPYCVN6.jpg" alt="Pripravka Przyprawa do Mięs z Brazylijskim Różowym Pieprzem 50g Exclusive Professional – Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWPYCVN6</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Exclusive Professional</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Mięs z Brazylijskim Różowym Pieprzem 50g Exclusive Professional – Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Brazylijskim-Exclusive-Professional/dp/B0GWPYCVN6?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Mięs z Brazylijskim Różowym Pieprzem 50g Exclusive Professional – Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Doypack Zip</td><td class="editable">Pripravka приправа до м&#x27;яса з бразильським рожевим перцем 50 г Exclusive Professional - натуральна суміш спецій, парова стерилізація, чистий склад, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Doypack Zip</td><td class="editable">натуральна суміш спецій, парова стерилізація, чистий склад, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Exclusive Professional
+Naturalna przyprawa grubo mielona
+Do mięs
+z brazylijskim różowym pieprzem
+Bez dodatku soli
+Perła Rynku 2025
+7 etapów oczyszczania
+Propozycja podania
+50 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Exclusive Professional
+Натуральна крупномелена приправа
+До м&#x27;яса
+з бразильським рожевим перцем
+Без додавання солі
+Перлина ринку 2025
+7 етапів очищення
+Приклад подавання
+50 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWPWPTHT" data-category="Exclusive Professional">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Exclusive Professional</span>
+                  <span class="tag light">B0GWPWPTHT</span>
+                </div>
+                <figure><img src="assets/B0GWPWPTHT.jpg" alt="Pripravka Curry z Kurkumą i Imbirem 50g Exclusive Professional – Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Intensywny Aromat, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWPWPTHT</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Exclusive Professional</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Curry z Kurkumą i Imbirem 50g Exclusive Professional – Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Intensywny Aromat, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Kurkum%C4%85-Imbirem-Exclusive-Professional/dp/B0GWPWPTHT?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Curry z Kurkumą i Imbirem 50g Exclusive Professional – Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Intensywny Aromat, Doypack Zip</td><td class="editable">Pripravka карі з куркумою і імбиром 50 г Exclusive Professional - натуральна суміш спецій, парова стерилізація, чистий склад, інтенсивний аромат, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka Przypraw, Sterylizacja Parowa, Czysty Skład, Intensywny Aromat, Doypack Zip</td><td class="editable">натуральна суміш спецій, парова стерилізація, чистий склад, інтенсивний аромат, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Exclusive Professional
+Naturalna przyprawa grubo mielona
+Curry
+z kurkumą i imbirem
+Bez dodatku soli
+Perła Rynku 2025
+7 etapów oczyszczania
+Propozycja podania
+50 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Exclusive Professional
+Натуральна крупномелена приправа
+Карі
+з куркумою та імбиром
+Без додавання солі
+Перлина ринку 2025
+7 етапів очищення
+Приклад подавання
+50 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GQZLRBZM" data-category="Exclusive Professional">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Exclusive Professional</span>
+                  <span class="tag light">B0GQZLRBZM</span>
+                </div>
+                <figure><img src="assets/B0GQZLRBZM.jpg" alt="Pripravka Zioła Prowansalskie 30g Exclusive Professional – Naturalna Przyprawa, Sterylizacja Parowa, Czysty Skład, Bazylia Oregano Tymianek Rozmaryn Czosnek, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GQZLRBZM</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Exclusive Professional</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Zioła Prowansalskie 30g Exclusive Professional – Naturalna Przyprawa, Sterylizacja Parowa, Czysty Skład, Bazylia Oregano Tymianek Rozmaryn Czosnek, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Ziola-Prowansalskie-Exclusive-Professional/dp/B0GQZLRBZM?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Zioła Prowansalskie 30g Exclusive Professional – Naturalna Przyprawa, Sterylizacja Parowa, Czysty Skład, Bazylia Oregano Tymianek Rozmaryn Czosnek, Doypack Zip</td><td class="editable">Pripravka прованські трави 30 г Exclusive Professional - натуральна приправа, парова стерилізація, чистий склад, базилік орегано тим&#x27;ян розмарин часник, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Przyprawa, Sterylizacja Parowa, Czysty Skład, Bazylia Oregano Tymianek Rozmaryn Czosnek, Doypack Zip</td><td class="editable">натуральна приправа, парова стерилізація, чистий склад, базилік орегано тим&#x27;ян розмарин часник, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Exclusive Professional
+Naturalna przyprawa grubo mielona
+Zioła prowansalskie
+Bez dodatku soli
+7 etapów oczyszczania
+Propozycja podania
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Exclusive Professional
+Натуральна крупномелена приправа
+Прованські трави
+Без додавання солі
+7 етапів очищення
+Приклад подавання
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQ9Z9SH" data-category="Grill &amp; BBQ">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Grill &amp; BBQ</span>
+                  <span class="tag light">B0GWQ9Z9SH</span>
+                </div>
+                <figure><img src="assets/B0GWQ9Z9SH.jpg" alt="Pripravka Naturalna Przyprawa Skrzydełka Meksykańskie Grill &amp; BBQ 30 g – Mieszanka z Sokiem Pomarańczowym, Tamaryndowcem i Imbirem, Intensywny Smak, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQ9Z9SH</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Grill &amp; BBQ</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Naturalna Przyprawa Skrzydełka Meksykańskie Grill &amp; BBQ 30 g – Mieszanka z Sokiem Pomarańczowym, Tamaryndowcem i Imbirem, Intensywny Smak, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Naturalna-Przyprawa-Skrzydelka-Meksyka%C5%84skie/dp/B0GWQ9Z9SH?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Naturalna Przyprawa Skrzydełka Meksykańskie Grill &amp; BBQ 30 g – Mieszanka z Sokiem Pomarańczowym, Tamaryndowcem i Imbirem, Intensywny Smak, Doypack Zip</td><td class="editable">Pripravka натуральна приправа мексиканські крильця гриль &amp; BBQ 30 г - суміш з апельсиновим соком, тамариндом і імбиром, інтенсивний смак, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Mieszanka z Sokiem Pomarańczowym, Tamaryndowcem i Imbirem, Intensywny Smak, Doypack Zip</td><td class="editable">суміш з апельсиновим соком, тамариндом і імбиром, інтенсивний смак, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+GRILL &amp; BBQ
+Naturalna przyprawa do mięsa i kurczaka
+Skrzydełka meksykańskie
+z naturalnym pomarańczowym sokiem, tamaryndowcem i imbirem
+100% naturalnych składników
+Bez dodatku glutaminianu monosodowego, barwników i konserwantów
+Sposoby przygotowania
+Patelnia
+Kuchenka mikrofalowa
+Piekarnik
+Grill
+Zero cukru
+Zdjęcie symboliczne
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+GRILL &amp; BBQ
+Натуральна приправа до м&#x27;яса і курки
+Мексиканські крильця
+з натуральним апельсиновим соком, тамариндом та імбиром
+100% натуральних інгредієнтів
+Без додавання глутамату натрію, барвників і консервантів
+Способи приготування
+Сковорода
+Мікрохвильова піч
+Духовка
+Гриль
+Нуль цукру
+Символічне фото
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQ6QD2K" data-category="Grill &amp; BBQ">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Grill &amp; BBQ</span>
+                  <span class="tag light">B0GWQ6QD2K</span>
+                </div>
+                <figure><img src="assets/B0GWQ6QD2K.jpg" alt="Pripravka Przyprawa do Żeberek Grill &amp; BBQ 30 g – Wędzone Pomidory i Chili, Naturalna Mieszanka do Mięsa, Intensywny Aromat Dymu, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQ6QD2K</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Grill &amp; BBQ</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Żeberek Grill &amp; BBQ 30 g – Wędzone Pomidory i Chili, Naturalna Mieszanka do Mięsa, Intensywny Aromat Dymu, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-%C5%BBeberek-Grill-BBQ/dp/B0GWQ6QD2K?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Żeberek Grill &amp; BBQ 30 g – Wędzone Pomidory i Chili, Naturalna Mieszanka do Mięsa, Intensywny Aromat Dymu, Doypack Zip</td><td class="editable">Pripravka приправа до реберець гриль &amp; BBQ 30 г - копчені помідори і чилі, натуральна суміш до м&#x27;яса, інтенсивний аромат диму, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Wędzone Pomidory i Chili, Naturalna Mieszanka do Mięsa, Intensywny Aromat Dymu, Doypack Zip</td><td class="editable">копчені помідори і чилі, натуральна суміш до м&#x27;яса, інтенсивний аромат диму, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+GRILL &amp; BBQ
+Naturalna przyprawa do mięsa i kurczaka
+Żeberka grillowane
+z naturalnymi wędzonymi pomidorami, chili i musztardą
+100% naturalnych składników
+Bez dodatku glutaminianu monosodowego, barwników i konserwantów
+Sposoby przygotowania
+Patelnia
+Kuchenka mikrofalowa
+Piekarnik
+Grill
+Zero cukru
+Zdjęcie symboliczne
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+GRILL &amp; BBQ
+Натуральна приправа до м&#x27;яса і курки
+Реберця гриль
+з натуральними копченими помідорами, чилі та гірчицею
+100% натуральних інгредієнтів
+Без додавання глутамату натрію, барвників і консервантів
+Способи приготування
+Сковорода
+Мікрохвильова піч
+Духовка
+Гриль
+Нуль цукру
+Символічне фото
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQFM1RN" data-category="Grill &amp; BBQ">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Grill &amp; BBQ</span>
+                  <span class="tag light">B0GWQFM1RN</span>
+                </div>
+                <figure><img src="assets/B0GWQFM1RN.jpg" alt="Pripravka Naturalna Przyprawa Grill &amp; BBQ Sycylijska Ryba 30 g – do Ryb, Drobiu i Mięsa, z Sokiem z Limonki, Liśćmi Kaffir i Chili, Sterylizacja Parowa, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQFM1RN</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Grill &amp; BBQ</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Naturalna Przyprawa Grill &amp; BBQ Sycylijska Ryba 30 g – do Ryb, Drobiu i Mięsa, z Sokiem z Limonki, Liśćmi Kaffir i Chili, Sterylizacja Parowa, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Naturalna-Przyprawa-Grill-Sycylijska/dp/B0GWQFM1RN?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Naturalna Przyprawa Grill &amp; BBQ Sycylijska Ryba 30 g – do Ryb, Drobiu i Mięsa, z Sokiem z Limonki, Liśćmi Kaffir i Chili, Sterylizacja Parowa, Doypack Zip</td><td class="editable">Pripravka натуральна приправа гриль &amp; BBQ сицилійська риба 30 г - до риби, птиці і м&#x27;яса, з соком лайма, листям кафіру і чилі, парова стерилізація, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">do Ryb, Drobiu i Mięsa, z Sokiem z Limonki, Liśćmi Kaffir i Chili, Sterylizacja Parowa, Doypack Zip</td><td class="editable">до риби, птиці і м&#x27;яса, з соком лайма, листям кафіру і чилі, парова стерилізація, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+GRILL &amp; BBQ
+Naturalna przyprawa do ryb i owoców morza
+Sycylijska ryba
+z naturalnym sokiem z limonki, liśćmi kaffir i chili
+100% naturalnych składników
+Bez dodatku glutaminianu monosodowego, barwników i konserwantów
+Sposoby przygotowania
+Patelnia
+Kuchenka mikrofalowa
+Piekarnik
+Grill
+Zero cukru
+Zdjęcie symboliczne
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+GRILL &amp; BBQ
+Натуральна приправа до риби та морепродуктів
+Сицилійська риба
+з натуральним соком лайма, листям кафір-лайма та чилі
+100% натуральних інгредієнтів
+Без додавання глутамату натрію, барвників і консервантів
+Способи приготування
+Сковорода
+Мікрохвильова піч
+Духовка
+Гриль
+Нуль цукру
+Символічне фото
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWPZKXXT" data-category="Grill &amp; BBQ">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Grill &amp; BBQ</span>
+                  <span class="tag light">B0GWPZKXXT</span>
+                </div>
+                <figure><img src="assets/B0GWPZKXXT.jpg" alt="Pripravka Naturalna Przyprawa Grill &amp; BBQ Stek po Teksańsku 30 g – Mieszanka z Pieprzem Syczuańskim i Słodem Żytnim, Intensywny Smak, Sterylizacja Parowa, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWPZKXXT</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Grill &amp; BBQ</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Naturalna Przyprawa Grill &amp; BBQ Stek po Teksańsku 30 g – Mieszanka z Pieprzem Syczuańskim i Słodem Żytnim, Intensywny Smak, Sterylizacja Parowa, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Naturalna-Przyprawa-Grill-Teksa%C5%84sku/dp/B0GWPZKXXT?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Naturalna Przyprawa Grill &amp; BBQ Stek po Teksańsku 30 g – Mieszanka z Pieprzem Syczuańskim i Słodem Żytnim, Intensywny Smak, Sterylizacja Parowa, Doypack Zip</td><td class="editable">Pripravka натуральна приправа гриль &amp; BBQ стейк по-техаськи 30 г - суміш з сичуанським перцем і житнім солодом, інтенсивний смак, парова стерилізація, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Mieszanka z Pieprzem Syczuańskim i Słodem Żytnim, Intensywny Smak, Sterylizacja Parowa, Doypack Zip</td><td class="editable">суміш з сичуанським перцем і житнім солодом, інтенсивний смак, парова стерилізація, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+GRILL &amp; BBQ
+Naturalna przyprawa do mięsa i kurczaka
+Stek po teksańsku
+z pieprzem syczuańskim i słodem żytnim
+100% naturalnych składników
+Bez dodatku glutaminianu monosodowego, barwników i konserwantów
+Sposoby przygotowania
+Patelnia
+Kuchenka mikrofalowa
+Piekarnik
+Grill
+Zero cukru
+Zdjęcie symboliczne
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+GRILL &amp; BBQ
+Натуральна приправа до м&#x27;яса і курки
+Стейк по-техаськи
+з сичуанським перцем і житнім солодом
+100% натуральних інгредієнтів
+Без додавання глутамату натрію, барвників і консервантів
+Способи приготування
+Сковорода
+Мікрохвильова піч
+Духовка
+Гриль
+Нуль цукру
+Символічне фото
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQ69PQ4" data-category="O-o-o, Jakie ziemniaki">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">O-o-o, Jakie ziemniaki</span>
+                  <span class="tag light">B0GWQ69PQ4</span>
+                </div>
+                <figure><img src="assets/B0GWQ69PQ4.jpg" alt="Pripravka Przyprawa do Ziemniaków 25g, JAKIE ZIEMNIAKI Amerykańska – Bekon i Karmelizowana Cebula, Mieszanka do Frytek, Pieczenia i Puree, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQ69PQ4</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>O-o-o, Jakie ziemniaki</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Ziemniaków 25g, JAKIE ZIEMNIAKI Amerykańska – Bekon i Karmelizowana Cebula, Mieszanka do Frytek, Pieczenia i Puree, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Ziemniak%C3%B3w-ZIEMNIAKI-Ameryka%C5%84ska/dp/B0GWQ69PQ4?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Ziemniaków 25g, JAKIE ZIEMNIAKI Amerykańska – Bekon i Karmelizowana Cebula, Mieszanka do Frytek, Pieczenia i Puree, Doypack Zip</td><td class="editable">Pripravka приправа до картоплі 25 г, яка картопля американська - бекон і карамелізована цибуля, суміш для картоплі фрі, запікання і пюре, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Bekon i Karmelizowana Cebula, Mieszanka do Frytek, Pieczenia i Puree, Doypack Zip</td><td class="editable">бекон і карамелізована цибуля, суміш для картоплі фрі, запікання і пюре, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+O-o-o, jakie ziemniaki
+Amerykańskie
+Perła Rynku 2025
+o smaku bekonu i karmelizowanej cebuli
+Naturalna przyprawa do ziemniaków
+Propozycja podania
+Zeskanuj smartfonem i pysznie ugotuj
+25 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+О-о-о, яка картопля
+Американські
+Перлина ринку 2025
+зі смаком бекону та карамелізованої цибулі
+Натуральна приправа до картоплі
+Приклад подавання
+Відскануй смартфоном і смачно приготуй
+25 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQ8F15V" data-category="O-o-o, Jakie ziemniaki">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">O-o-o, Jakie ziemniaki</span>
+                  <span class="tag light">B0GWQ8F15V</span>
+                </div>
+                <figure><img src="assets/B0GWQ8F15V.jpg" alt="Pripravka Przyprawa do Ziemniaków po Grecku, Jakie Ziemniaki 25 g – Suszone Pomidory, Skórka z Cytryny, Zioła Śródziemnomorskie, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQ8F15V</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>O-o-o, Jakie ziemniaki</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Ziemniaków po Grecku, Jakie Ziemniaki 25 g – Suszone Pomidory, Skórka z Cytryny, Zioła Śródziemnomorskie, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Ziemniak%C3%B3w-Grecku-Ziemniaki/dp/B0GWQ8F15V?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Ziemniaków po Grecku, Jakie Ziemniaki 25 g – Suszone Pomidory, Skórka z Cytryny, Zioła Śródziemnomorskie, Doypack Zip</td><td class="editable">Pripravka приправа до картоплі по-грецьки, яка картопля 25 г - сушені помідори, лимонна цедра, середземноморські трави, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Suszone Pomidory, Skórka z Cytryny, Zioła Śródziemnomorskie, Doypack Zip</td><td class="editable">сушені помідори, лимонна цедра, середземноморські трави, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+O-o-o, jakie ziemniaki
+Greckie
+Perła Rynku 2025
+ze skórką z cytryny i pomidorami
+Naturalna przyprawa do ziemniaków i warzyw
+Propozycja podania
+Zeskanuj smartfonem i pysznie ugotuj
+25 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+О-о-о, яка картопля
+Грецькі
+Перлина ринку 2025
+з лимонною цедрою та помідорами
+Натуральна приправа до картоплі та овочів
+Приклад подавання
+Відскануй смартфоном і смачно приготуй
+25 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQ686KL" data-category="O-o-o, Jakie ziemniaki">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">O-o-o, Jakie ziemniaki</span>
+                  <span class="tag light">B0GWQ686KL</span>
+                </div>
+                <figure><img src="assets/B0GWQ686KL.jpg" alt="Pripravka Przyprawa do Ziemniaków Włoskie Ser i Czosnek 25 g – Naturalna Mieszanka, 26% Czosnku, Intensywny Smak, do Frytek, Puree i Pieczenia, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQ686KL</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>O-o-o, Jakie ziemniaki</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Ziemniaków Włoskie Ser i Czosnek 25 g – Naturalna Mieszanka, 26% Czosnku, Intensywny Smak, do Frytek, Puree i Pieczenia, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Ziemniak%C3%B3w-Wloskie-Czosnek/dp/B0GWQ686KL?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Ziemniaków Włoskie Ser i Czosnek 25 g – Naturalna Mieszanka, 26% Czosnku, Intensywny Smak, do Frytek, Puree i Pieczenia, Doypack Zip</td><td class="editable">Pripravka приправа до картоплі італійські сир і часник 25 г - натуральна суміш, 26% часнику, інтенсивний смак, для картоплі фрі, пюре і запікання, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka, 26% Czosnku, Intensywny Smak, do Frytek, Puree i Pieczenia, Doypack Zip</td><td class="editable">натуральна суміш, 26% часнику, інтенсивний смак, для картоплі фрі, пюре і запікання, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+O-o-o, jakie ziemniaki
+Włoskie
+Perła Rynku 2025
+o smaku sera i z czosnkiem
+Naturalna przyprawa do ziemniaków i warzyw
+Propozycja podania
+Zeskanuj smartfonem i pysznie ugotuj
+25 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+О-о-о, яка картопля
+Італійські
+Перлина ринку 2025
+зі смаком сиру та з часником
+Натуральна приправа до картоплі та овочів
+Приклад подавання
+Відскануй смартфоном і смачно приготуй
+25 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWPZJZFN" data-category="O-o-o, Jakie ziemniaki">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">O-o-o, Jakie ziemniaki</span>
+                  <span class="tag light">B0GWPZJZFN</span>
+                </div>
+                <figure><img src="assets/B0GWPZJZFN.jpg" alt="Pripravka Przyprawa do Ziemniaków po Meksykańsku 25 g – Mieszanka z Wędzoną Papryką i Kminkiem, Intensywny Aromat, do Frytek, Pieczenia i Grillowania, Doypack Zip" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWPZJZFN</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>O-o-o, Jakie ziemniaki</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Ziemniaków po Meksykańsku 25 g – Mieszanka z Wędzoną Papryką i Kminkiem, Intensywny Aromat, do Frytek, Pieczenia i Grillowania, Doypack Zip</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Ziemniak%C3%B3w-Meksyka%C5%84sku-Grillowania/dp/B0GWPZJZFN?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Ziemniaków po Meksykańsku 25 g – Mieszanka z Wędzoną Papryką i Kminkiem, Intensywny Aromat, do Frytek, Pieczenia i Grillowania, Doypack Zip</td><td class="editable">Pripravka приправа до картоплі по-мексиканськи 25 г - суміш з копченою паприкою і кмином, інтенсивний аромат, для картоплі фрі, запікання і грилювання, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Mieszanka z Wędzoną Papryką i Kminkiem, Intensywny Aromat, do Frytek, Pieczenia i Grillowania, Doypack Zip</td><td class="editable">суміш з копченою паприкою і кмином, інтенсивний аромат, для картоплі фрі, запікання і грилювання, Doypack Zip</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+O-o-o, jakie ziemniaki
+Meksykańskie
+Perła Rynku 2025
+z wędzoną papryką i kminkiem
+Naturalna przyprawa do ziemniaków i warzyw
+Propozycja podania
+Zeskanuj smartfonem i pysznie ugotuj
+25 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+О-о-о, яка картопля
+Мексиканські
+Перлина ринку 2025
+з копченою паприкою та кмином
+Натуральна приправа до картоплі та овочів
+Приклад подавання
+Відскануй смартфоном і смачно приготуй
+25 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR11MQT5" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR11MQT5</span>
+                </div>
+                <figure><img src="assets/B0GR11MQT5.jpg" alt="Pripravka Zioła Grecji z Czosnkiem i Trawą Cytrynową 10 g – Naturalna Mieszanka Ziół bez Soli i Cukru, Sterylizowana Parowo, do Mięs, Ryb i Sałatek" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR11MQT5</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Zioła Grecji z Czosnkiem i Trawą Cytrynową 10 g – Naturalna Mieszanka Ziół bez Soli i Cukru, Sterylizowana Parowo, do Mięs, Ryb i Sałatek</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Ziola-Grecji-Czosnkiem-Cytrynow%C4%85/dp/B0GR11MQT5?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Zioła Grecji z Czosnkiem i Trawą Cytrynową 10 g – Naturalna Mieszanka Ziół bez Soli i Cukru, Sterylizowana Parowo, do Mięs, Ryb i Sałatek</td><td class="editable">Pripravka трави Греції з часником і лемонграсом 10 г - натуральна суміш трав без солі і цукру, стерилізована парою, до м&#x27;яса, риби і салатів</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka Ziół bez Soli i Cukru, Sterylizowana Parowo, do Mięs, Ryb i Sałatek</td><td class="editable">натуральна суміш трав без солі і цукру, стерилізована парою, до м&#x27;яса, риби і салатів</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Zioła Grecji
+z czosnkiem i trawą cytrynową
+Bez dodatku soli
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Czego dziś dowiesz o naszej przyprawie?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+10 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+Трави Греції
+з часником і лемонграсом
+Без додавання солі
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Що сьогодні дізнаєшся про нашу приправу?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+10 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR11JSQ5" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR11JSQ5</span>
+                </div>
+                <figure><img src="assets/B0GR11JSQ5.jpg" alt="Pripravka Zioła Włoch bez Soli i Cukru 10 g – Naturalna Mieszanka Przypraw do Mięs, Ryb i Sałatek, Sterylizacja Parowa, Bazylia Pomidory Oregano Czosnek Chili Mięta" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR11JSQ5</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Zioła Włoch bez Soli i Cukru 10 g – Naturalna Mieszanka Przypraw do Mięs, Ryb i Sałatek, Sterylizacja Parowa, Bazylia Pomidory Oregano Czosnek Chili Mięta</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Ziola-Wloch-Soli-Cukru/dp/B0GR11JSQ5?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Zioła Włoch bez Soli i Cukru 10 g – Naturalna Mieszanka Przypraw do Mięs, Ryb i Sałatek, Sterylizacja Parowa, Bazylia Pomidory Oregano Czosnek Chili Mięta</td><td class="editable">Pripravka трави Італії без солі і цукру 10 г - натуральна суміш спецій до м&#x27;яса, риби і салатів, парова стерилізація, базилік помідори орегано часник чилі м&#x27;ята</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka Przypraw do Mięs, Ryb i Sałatek, Sterylizacja Parowa, Bazylia Pomidory Oregano Czosnek Chili Mięta</td><td class="editable">натуральна суміш спецій до м&#x27;яса, риби і салатів, парова стерилізація, базилік помідори орегано часник чилі м&#x27;ята</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Zioła Włoch
+bazylia, pomidory, oregano, czosnek, chili i mięta
+Bez dodatku soli
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Czego dziś dowiesz o naszej przyprawie?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+10 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+Трави Італії
+базилік, помідори, орегано, часник, чилі та м&#x27;ята
+Без додавання солі
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Що сьогодні дізнаєшся про нашу приправу?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+10 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR19CRFR" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR19CRFR</span>
+                </div>
+                <figure><img src="assets/B0GR19CRFR.jpg" alt="Pripravka Zioła Francji 10 g – Naturalna Mieszanka Ziół z Lawendą i Rozmarynem, Bez Soli i Cukru, Sterylizacja Parowa, do Mięs, Ryb i Sałatek" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR19CRFR</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Zioła Francji 10 g – Naturalna Mieszanka Ziół z Lawendą i Rozmarynem, Bez Soli i Cukru, Sterylizacja Parowa, do Mięs, Ryb i Sałatek</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Ziola-Francji-Rozmarynem-Sterylizacja/dp/B0GR19CRFR?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Zioła Francji 10 g – Naturalna Mieszanka Ziół z Lawendą i Rozmarynem, Bez Soli i Cukru, Sterylizacja Parowa, do Mięs, Ryb i Sałatek</td><td class="editable">Pripravka трави Франції 10 г - натуральна суміш трав з лавандою і розмарином, без солі і цукру, парова стерилізація, до м&#x27;яса, риби і салатів</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka Ziół z Lawendą i Rozmarynem, Bez Soli i Cukru, Sterylizacja Parowa, do Mięs, Ryb i Sałatek</td><td class="editable">натуральна суміш трав з лавандою і розмарином, без солі і цукру, парова стерилізація, до м&#x27;яса, риби і салатів</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Zioła Francji
+z lawendą i rozmarynem
+Bez dodatku soli
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Czego dziś dowiesz o naszej przyprawie?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+10 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+Трави Франції
+з лавандою та розмарином
+Без додавання солі
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Що сьогодні дізнаєшся про нашу приправу?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+10 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5XXM78" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5XXM78</span>
+                </div>
+                <figure><img src="assets/B0GR5XXM78.jpg" alt="Pripravka Mieszanka Przyprawowa z Pieprzem Kolorowym i Chili Ancho 30 g – Naturalna Kompozycja bez Dodatku Cukru, Sterylizacja Parowa, do Mięs, Ryb i Sosów, Intensywny Aromat" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5XXM78</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Mieszanka Przyprawowa z Pieprzem Kolorowym i Chili Ancho 30 g – Naturalna Kompozycja bez Dodatku Cukru, Sterylizacja Parowa, do Mięs, Ryb i Sosów, Intensywny Aromat</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Mieszanka-Przyprawowa-Pieprzem-Kolorowym/dp/B0GR5XXM78?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Mieszanka Przyprawowa z Pieprzem Kolorowym i Chili Ancho 30 g – Naturalna Kompozycja bez Dodatku Cukru, Sterylizacja Parowa, do Mięs, Ryb i Sosów, Intensywny Aromat</td><td class="editable">Pripravka суміш спецій з кольоровим перцем і чилі анчо 30 г - натуральна композиція без додавання цукру, парова стерилізація, до м&#x27;яса, риби і соусів, інтенсивний аромат</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Kompozycja bez Dodatku Cukru, Sterylizacja Parowa, do Mięs, Ryb i Sosów, Intensywny Aromat</td><td class="editable">натуральна композиція без додавання цукру, парова стерилізація, до м&#x27;яса, риби і соусів, інтенсивний аромат</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Mieszanka przyprawowa
+Z pieprzem kolorowym
+mielony z dodatkiem chili ancho
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Приправна суміш
+З кольоровим перцем
+мелений, з додаванням чилі анчо
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5XX6B3" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5XX6B3</span>
+                </div>
+                <figure><img src="assets/B0GR5XX6B3.jpg" alt="Pripravka Pieprz Czosnkowy 20 g – Intensywna Mieszanka Przypraw do Mięsa, Ryb i Sałatek, 30% Czosnku i 20% Pieprzu, Sterylizacja Parowa, Bez Dodatku Cukru, Naturalny Skład" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5XX6B3</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Pieprz Czosnkowy 20 g – Intensywna Mieszanka Przypraw do Mięsa, Ryb i Sałatek, 30% Czosnku i 20% Pieprzu, Sterylizacja Parowa, Bez Dodatku Cukru, Naturalny Skład</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Pieprz-Czosnkowy-Intensywna-Sterylizacja/dp/B0GR5XX6B3?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Pieprz Czosnkowy 20 g – Intensywna Mieszanka Przypraw do Mięsa, Ryb i Sałatek, 30% Czosnku i 20% Pieprzu, Sterylizacja Parowa, Bez Dodatku Cukru, Naturalny Skład</td><td class="editable">Pripravka часниковий перець 20 г - інтенсивна суміш спецій до м&#x27;яса, риби і салатів, 30% часнику і 20% перцю, парова стерилізація, без додавання цукру, натуральний склад</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Intensywna Mieszanka Przypraw do Mięsa, Ryb i Sałatek, 30% Czosnku i 20% Pieprzu, Sterylizacja Parowa, Bez Dodatku Cukru, Naturalny Skład</td><td class="editable">інтенсивна суміш спецій до м&#x27;яса, риби і салатів, 30% часнику і 20% перцю, парова стерилізація, без додавання цукру, натуральний склад</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Mieszanka przyprawowa
+Pieprz czosnkowy
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+20 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Приправна суміш
+Часниковий перець
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+20 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR62J427" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR62J427</span>
+                </div>
+                <figure><img src="assets/B0GR62J427.jpg" alt="Pripravka Pieprz Ziołowy 20 g – Intensywna Mieszanka Przypraw bez Dodatku Cukru, Sterylizacja Parowa, Naturalny Skład, do Mięs, Ryb, Zup i Sałatek" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR62J427</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Pieprz Ziołowy 20 g – Intensywna Mieszanka Przypraw bez Dodatku Cukru, Sterylizacja Parowa, Naturalny Skład, do Mięs, Ryb, Zup i Sałatek</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Pieprz-Ziolowy-Intensywna-Sterylizacja/dp/B0GR62J427?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Pieprz Ziołowy 20 g – Intensywna Mieszanka Przypraw bez Dodatku Cukru, Sterylizacja Parowa, Naturalny Skład, do Mięs, Ryb, Zup i Sałatek</td><td class="editable">Pripravka трав&#x27;яний перець 20 г - інтенсивна суміш спецій без додавання цукру, парова стерилізація, натуральний склад, до м&#x27;яса, риби, супів і салатів</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Intensywna Mieszanka Przypraw bez Dodatku Cukru, Sterylizacja Parowa, Naturalny Skład, do Mięs, Ryb, Zup i Sałatek</td><td class="editable">інтенсивна суміш спецій без додавання цукру, парова стерилізація, натуральний склад, до м&#x27;яса, риби, супів і салатів</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Mieszanka przyprawowa
+Pieprz ziołowy
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+20 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Приправна суміш
+Трав&#x27;яний перець
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+20 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5P4VHT" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5P4VHT</span>
+                </div>
+                <figure><img src="assets/B0GR5P4VHT.jpg" alt="Pripravka Naturalna Przyprawa do Mięs 30 g z Czosnkiem i Bazylią – Mieszanka Ziół bez Dodatku Cukru, Sterylizowana Parą, do Wieprzowiny, Wołowiny i Drobiu, do Smażenia i Pieczenia" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5P4VHT</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Naturalna Przyprawa do Mięs 30 g z Czosnkiem i Bazylią – Mieszanka Ziół bez Dodatku Cukru, Sterylizowana Parą, do Wieprzowiny, Wołowiny i Drobiu, do Smażenia i Pieczenia</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Naturalna-Przyprawa-Czosnkiem-Bazyli%C4%85/dp/B0GR5P4VHT?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Naturalna Przyprawa do Mięs 30 g z Czosnkiem i Bazylią – Mieszanka Ziół bez Dodatku Cukru, Sterylizowana Parą, do Wieprzowiny, Wołowiny i Drobiu, do Smażenia i Pieczenia</td><td class="editable">Pripravka натуральна приправа до м&#x27;яса 30 г з часником і базиліком - суміш трав без додавання цукру, стерилізована парою, для свинини, яловичини і птиці, для смаження і запікання</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Mieszanka Ziół bez Dodatku Cukru, Sterylizowana Parą, do Wieprzowiny, Wołowiny i Drobiu, do Smażenia i Pieczenia</td><td class="editable">суміш трав без додавання цукру, стерилізована парою, для свинини, яловичини і птиці, для смаження і запікання</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Do mięs
+z czosnkiem i bazylią
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+До м&#x27;яса
+з часником і базиліком
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWQ82XSS" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GWQ82XSS</span>
+                </div>
+                <figure><img src="assets/B0GWQ82XSS.jpg" alt="Przyprawa do kurczaka grill i piekarnik – mieszanka przypraw do mięsa, kurkuma czosnek naturalna przyprawa bez cukru i soli, do pieczenia smażenia grillowania, przyprawa do kurczaka i mięsa" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWQ82XSS</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Przyprawa do kurczaka grill i piekarnik – mieszanka przypraw do mięsa, kurkuma czosnek naturalna przyprawa bez cukru i soli, do pieczenia smażenia grillowania, przyprawa do kurczaka i mięsa</h2>
+                  <a class="button" href="https://www.amazon.pl/Przyprawa-kurczaka-grill-piekarnik-grillowania/dp/B0GWQ82XSS?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Przyprawa do kurczaka grill i piekarnik – mieszanka przypraw do mięsa, kurkuma czosnek naturalna przyprawa bez cukru i soli, do pieczenia smażenia grillowania, przyprawa do kurczaka i mięsa</td><td class="editable">приправа до курки гриль і духовка - суміш спецій до м&#x27;яса, куркума часник натуральна приправа без цукру і солі, для запікання смаження грилювання, приправа до курки і м&#x27;яса</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">mieszanka przypraw do mięsa, kurkuma czosnek naturalna przyprawa bez cukru i soli, do pieczenia smażenia grillowania, przyprawa do kurczaka i mięsa</td><td class="editable">суміш спецій до м&#x27;яса, куркума часник натуральна приправа без цукру і солі, для запікання смаження грилювання, приправа до курки і м&#x27;яса</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Do kurczaka
+grill i piekarnik
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+До курки
+гриль і духовка
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5PP3VK" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5PP3VK</span>
+                </div>
+                <figure><img src="assets/B0GR5PP3VK.jpg" alt="Pripravka Naturalna Przyprawa do Ziemniaków 30 g – Mieszanka Ziół z Kolendrą i Cebulą, Bez Dodatku Cukru, Sterylizacja Parowa, do Pieczenia, Frytek i Puree, Naturalny Skład" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5PP3VK</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Naturalna Przyprawa do Ziemniaków 30 g – Mieszanka Ziół z Kolendrą i Cebulą, Bez Dodatku Cukru, Sterylizacja Parowa, do Pieczenia, Frytek i Puree, Naturalny Skład</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Naturalna-Przyprawa-Ziemniak%C3%B3w-Sterylizacja/dp/B0GR5PP3VK?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Naturalna Przyprawa do Ziemniaków 30 g – Mieszanka Ziół z Kolendrą i Cebulą, Bez Dodatku Cukru, Sterylizacja Parowa, do Pieczenia, Frytek i Puree, Naturalny Skład</td><td class="editable">Pripravka натуральна приправа до картоплі 30 г - суміш трав з коріандром і цибулею, без додавання цукру, парова стерилізація, для запікання, картоплі фрі і пюре, натуральний склад</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Mieszanka Ziół z Kolendrą i Cebulą, Bez Dodatku Cukru, Sterylizacja Parowa, do Pieczenia, Frytek i Puree, Naturalny Skład</td><td class="editable">суміш трав з коріандром і цибулею, без додавання цукру, парова стерилізація, для запікання, картоплі фрі і пюре, натуральний склад</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Do ziemniaków
+z kolendrą i cebulą
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+До картоплі
+з коріандром і цибулею
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5W67KS" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5W67KS</span>
+                </div>
+                <figure><img src="assets/B0GR5W67KS.jpg" alt="Pripravka Przyprawa Curry z Kurkumą i Imbirem 30 g – Naturalna Mieszanka bez Dodatku Cukru, z Liśćmi Curry, Sterylizacja Parowa, Intensywny Aromat do Dań Orientalnych" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5W67KS</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa Curry z Kurkumą i Imbirem 30 g – Naturalna Mieszanka bez Dodatku Cukru, z Liśćmi Curry, Sterylizacja Parowa, Intensywny Aromat do Dań Orientalnych</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Curry-Kurkum%C4%85-Imbirem/dp/B0GR5W67KS?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa Curry z Kurkumą i Imbirem 30 g – Naturalna Mieszanka bez Dodatku Cukru, z Liśćmi Curry, Sterylizacja Parowa, Intensywny Aromat do Dań Orientalnych</td><td class="editable">Pripravka приправа карі з куркумою і імбиром 30 г - натуральна суміш без додавання цукру, з листям карі, парова стерилізація, інтенсивний аромат до східних страв</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka bez Dodatku Cukru, z Liśćmi Curry, Sterylizacja Parowa, Intensywny Aromat do Dań Orientalnych</td><td class="editable">натуральна суміш без додавання цукру, з листям карі, парова стерилізація, інтенсивний аромат до східних страв</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Curry
+z kurkumą i imbirem
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+Карі
+з куркумою та імбиром
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5VR6VT" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5VR6VT</span>
+                </div>
+                <figure><img src="assets/B0GR5VR6VT.jpg" alt="Pripravka Przyprawa do Kurczaka po Staropolsku 30 g – Naturalna Mieszanka Ziół i Przypraw, Bez Dodatku Cukru, Sterylizacja Parowa, Tradycyjny Smak do Pieczenia, Grillowania i Smażenia Drobiu" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5VR6VT</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Kurczaka po Staropolsku 30 g – Naturalna Mieszanka Ziół i Przypraw, Bez Dodatku Cukru, Sterylizacja Parowa, Tradycyjny Smak do Pieczenia, Grillowania i Smażenia Drobiu</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Kurczaka-Staropolsku-Sterylizacja/dp/B0GR5VR6VT?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Kurczaka po Staropolsku 30 g – Naturalna Mieszanka Ziół i Przypraw, Bez Dodatku Cukru, Sterylizacja Parowa, Tradycyjny Smak do Pieczenia, Grillowania i Smażenia Drobiu</td><td class="editable">Pripravka приправа до курки по-старопольськи 30 г - натуральна суміш трав і спецій, без додавання цукру, парова стерилізація, традиційний смак для запікання, грилювання і смаження птиці</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka Ziół i Przypraw, Bez Dodatku Cukru, Sterylizacja Parowa, Tradycyjny Smak do Pieczenia, Grillowania i Smażenia Drobiu</td><td class="editable">натуральна суміш трав і спецій, без додавання цукру, парова стерилізація, традиційний смак для запікання, грилювання і смаження птиці</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Do kurczaka po staropolsku
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+До курки по-старопольськи
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5SDW21" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5SDW21</span>
+                </div>
+                <figure><img src="assets/B0GR5SDW21.jpg" alt="Pripravka Przyprawa do Mięsa Mielonego 30 g – Naturalna Mieszanka do Kotletów, Burgerów i Pulpetów, bez Dodatku Cukru, Sterylizacja Parowa" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5SDW21</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Mięsa Mielonego 30 g – Naturalna Mieszanka do Kotletów, Burgerów i Pulpetów, bez Dodatku Cukru, Sterylizacja Parowa</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Mi%C4%99sa-Mielonego-Sterylizacja/dp/B0GR5SDW21?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Mięsa Mielonego 30 g – Naturalna Mieszanka do Kotletów, Burgerów i Pulpetów, bez Dodatku Cukru, Sterylizacja Parowa</td><td class="editable">Pripravka приправа до фаршу 30 г - натуральна суміш до котлет, бургерів і фрикадельок, без додавання цукру, парова стерилізація</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka do Kotletów, Burgerów i Pulpetów, bez Dodatku Cukru, Sterylizacja Parowa</td><td class="editable">натуральна суміш до котлет, бургерів і фрикадельок, без додавання цукру, парова стерилізація</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Do mięsa mielonego
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+До фаршу
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5XJ3W7" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5XJ3W7</span>
+                </div>
+                <figure><img src="assets/B0GR5XJ3W7.jpg" alt="Pripravka Naturalna Przyprawa do Mięsa Wieprzowego 30 g – Mieszanka Ziół bez Dodatku Cukru, Sterylizacja Parowa, do Karkówki i Pieczeni, Intensywny Aromat" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5XJ3W7</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Naturalna Przyprawa do Mięsa Wieprzowego 30 g – Mieszanka Ziół bez Dodatku Cukru, Sterylizacja Parowa, do Karkówki i Pieczeni, Intensywny Aromat</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Naturalna-Przyprawa-Mi%C4%99sa-Wieprzowego/dp/B0GR5XJ3W7?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Naturalna Przyprawa do Mięsa Wieprzowego 30 g – Mieszanka Ziół bez Dodatku Cukru, Sterylizacja Parowa, do Karkówki i Pieczeni, Intensywny Aromat</td><td class="editable">Pripravka натуральна приправа до свинини 30 г - суміш трав без додавання цукру, парова стерилізація, до ошийка і печені, інтенсивний аромат</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Mieszanka Ziół bez Dodatku Cukru, Sterylizacja Parowa, do Karkówki i Pieczeni, Intensywny Aromat</td><td class="editable">суміш трав без додавання цукру, парова стерилізація, до ошийка і печені, інтенсивний аромат</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Do mięsa wieprzowego
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+До свинини
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5XCWP7" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5XCWP7</span>
+                </div>
+                <figure><img src="assets/B0GR5XCWP7.jpg" alt="Pripravka Naturalna Przyprawa do Ryb 30 g – Mieszanka z Kolendrą, Kurkumą i Imbirem, Bez Dodatku Cukru, Sterylizowana Parą, do Smażenia, Pieczenia i Grillowania" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5XCWP7</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Naturalna Przyprawa do Ryb 30 g – Mieszanka z Kolendrą, Kurkumą i Imbirem, Bez Dodatku Cukru, Sterylizowana Parą, do Smażenia, Pieczenia i Grillowania</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Naturalna-Przyprawa-Ryb-Sterylizowana/dp/B0GR5XCWP7?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Naturalna Przyprawa do Ryb 30 g – Mieszanka z Kolendrą, Kurkumą i Imbirem, Bez Dodatku Cukru, Sterylizowana Parą, do Smażenia, Pieczenia i Grillowania</td><td class="editable">Pripravka натуральна приправа до риби 30 г - суміш з коріандром, куркумою і імбиром, без додавання цукру, стерилізована парою, для смаження, запікання і грилювання</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Mieszanka z Kolendrą, Kurkumą i Imbirem, Bez Dodatku Cukru, Sterylizowana Parą, do Smażenia, Pieczenia i Grillowania</td><td class="editable">суміш з коріандром, куркумою і імбиром, без додавання цукру, стерилізована парою, для смаження, запікання і грилювання</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Do ryb
+z kolendrą, kurkumą i imbirem
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+До риби
+з коріандром, куркумою та імбиром
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5SLL54" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5SLL54</span>
+                </div>
+                <figure><img src="assets/B0GR5SLL54.jpg" alt="Pripravka Naturalna Przyprawa do Bigosu 30 g z Nasionami Gorczycy, Kminkiem i Szlachetnymi Borowikami - Wyjatkowa Mieszanka Ziolowa do Tradycyjnej Kapusty z Mięsem, Czyszczona Para" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5SLL54</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Naturalna Przyprawa do Bigosu 30 g z Nasionami Gorczycy, Kminkiem i Szlachetnymi Borowikami - Wyjatkowa Mieszanka Ziolowa do Tradycyjnej Kapusty z Mięsem, Czyszczona Para</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Naturalna-Przyprawa-Szlachetnymi-Borowikami/dp/B0GR5SLL54?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Naturalna Przyprawa do Bigosu 30 g z Nasionami Gorczycy, Kminkiem i Szlachetnymi Borowikami - Wyjatkowa Mieszanka Ziolowa do Tradycyjnej Kapusty z Mięsem, Czyszczona Para</td><td class="editable">Pripravka натуральна приправа до бігосу 30 г з насінням гірчиці, кмином і добірними білими грибами - виняткова трав&#x27;яна суміш до традиційної капусти з м&#x27;ясом, очищена парою</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Wyjatkowa Mieszanka Ziolowa do Tradycyjnej Kapusty z Mięsem, Czyszczona Para</td><td class="editable">виняткова трав&#x27;яна суміш до традиційної капусти з м&#x27;ясом, очищена парою</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Do bigosu
+z nasionami gorczycy, kminkiem i borowikami
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+До бігосу
+з насінням гірчиці, кмином і білими грибами
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5ZBCSL" data-category="Przyprawy poddane obróbce parą">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Przyprawy poddane obróbce parą</span>
+                  <span class="tag light">B0GR5ZBCSL</span>
+                </div>
+                <figure><img src="assets/B0GR5ZBCSL.jpg" alt="Pripravka Przyprawa do Gyrosa i Kebaba 30 g – Naturalna Mieszanka Przypraw z Czosnkiem i Kolendrą, Sterylizowana Parą, do Drobiu, Wieprzowiny i Warzyw" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5ZBCSL</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Przyprawy poddane obróbce parą</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Przyprawa do Gyrosa i Kebaba 30 g – Naturalna Mieszanka Przypraw z Czosnkiem i Kolendrą, Sterylizowana Parą, do Drobiu, Wieprzowiny i Warzyw</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Przyprawa-Gyrosa-Kebaba-Sterylizowana/dp/B0GR5ZBCSL?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Przyprawa do Gyrosa i Kebaba 30 g – Naturalna Mieszanka Przypraw z Czosnkiem i Kolendrą, Sterylizowana Parą, do Drobiu, Wieprzowiny i Warzyw</td><td class="editable">Pripravka приправа до гіроса і кебаба 30 г - натуральна суміш спецій з часником і коріандром, стерилізована парою, для птиці, свинини і овочів</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Naturalna Mieszanka Przypraw z Czosnkiem i Kolendrą, Sterylizowana Parą, do Drobiu, Wieprzowiny i Warzyw</td><td class="editable">натуральна суміш спецій з часником і коріандром, стерилізована парою, для птиці, свинини і овочів</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Przyprawy poddane obróbce parą
+Naturalna przyprawa
+Do gyrosa i kebaba
+Zero cukru
+100% naturalny produkt
+Zdjęcie symboliczne
+Dlaczego sterylizujemy nasze przyprawy?
+Zeskanuj kod QR, dowiedz się więcej
+* Dodatek cukru 0% / Доданого цукру 0%
+30 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Спеції, оброблені парою
+Натуральна приправа
+До гіроса і кебаба
+Нуль цукру
+100% натуральний продукт
+Символічне фото
+Чому ми стерилізуємо наші приправи?
+Відскануйте QR-код, дізнайтеся більше
+* Доданого цукру 0%
+30 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR65447J" data-category="Sosy WOK">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Sosy WOK</span>
+                  <span class="tag light">B0GR65447J</span>
+                </div>
+                <figure><img src="assets/B0GR65447J.jpg" alt="Pripravka Sos WOK ASIAN 140 g z Czarnym Pieprzem i Sosem Sojowym – Sos do Dań Stir-Fry, Mięsa, Drobiu, Owoców Morza i Warzyw, Bez Konserwantów" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR65447J</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Sosy WOK</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Sos WOK ASIAN 140 g z Czarnym Pieprzem i Sosem Sojowym – Sos do Dań Stir-Fry, Mięsa, Drobiu, Owoców Morza i Warzyw, Bez Konserwantów</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-ASIAN-Czarnym-Pieprzem-Sojowym/dp/B0GR65447J?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Sos WOK ASIAN 140 g z Czarnym Pieprzem i Sosem Sojowym – Sos do Dań Stir-Fry, Mięsa, Drobiu, Owoców Morza i Warzyw, Bez Konserwantów</td><td class="editable">Pripravka соус WOK ASIAN 140 г з чорним перцем і соєвим соусом - соус до страв Stir-Fry, м&#x27;яса, птиці, морепродуктів і овочів, без консервантів</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Sos do Dań Stir-Fry, Mięsa, Drobiu, Owoców Morza i Warzyw, Bez Konserwantów</td><td class="editable">соус до страв Stir-Fry, м&#x27;яса, птиці, морепродуктів і овочів, без консервантів</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+WOK sauce ASIAN
+czarny pieprz i sos sojowy
+Światowej klasy mistrz kuchni
+Odkryj zwariowany świat AI-AZJI
+Rozmawiaj z wirtualnym szefem kuchni, generuj obrazy*
+* Treści na stronie zostały wygenerowane przez AI
+140 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Соус WOK ASIAN
+чорний перець і соєвий соус
+Майстер кухні світового класу
+Відкрий шалений світ AI-АЗІЇ
+Спілкуйся з віртуальним шеф-кухарем, генеруй зображення*
+* Вміст на сторінці згенеровано штучним інтелектом
+140 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5YXV1D" data-category="Sosy WOK">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Sosy WOK</span>
+                  <span class="tag light">B0GR5YXV1D</span>
+                </div>
+                <figure><img src="assets/B0GR5YXV1D.jpg" alt="Pripravka Sos WOK CHOW MEIN z Imbirem 5,9% i Sezamem 140 g – Sos do Dań Stir-Fry, Kuchnia Azjatycka, Bez Konserwantów, do Mięsa, Drobiu, Owoców Morza, Warzyw, Ryżu i Makaronu" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5YXV1D</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Sosy WOK</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Sos WOK CHOW MEIN z Imbirem 5,9% i Sezamem 140 g – Sos do Dań Stir-Fry, Kuchnia Azjatycka, Bez Konserwantów, do Mięsa, Drobiu, Owoców Morza, Warzyw, Ryżu i Makaronu</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-CHOW-MEIN-Imbirem-Sezamem/dp/B0GR5YXV1D?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Sos WOK CHOW MEIN z Imbirem 5,9% i Sezamem 140 g – Sos do Dań Stir-Fry, Kuchnia Azjatycka, Bez Konserwantów, do Mięsa, Drobiu, Owoców Morza, Warzyw, Ryżu i Makaronu</td><td class="editable">Pripravka соус WOK CHOW MEIN з імбиром 5,9% і кунжутом 140 г - соус до страв Stir-Fry, азійська кухня, без консервантів, до м&#x27;яса, птиці, морепродуктів, овочів, рису і локшини</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Sos do Dań Stir-Fry, Kuchnia Azjatycka, Bez Konserwantów, do Mięsa, Drobiu, Owoców Morza, Warzyw, Ryżu i Makaronu</td><td class="editable">соус до страв Stir-Fry, азійська кухня, без консервантів, до м&#x27;яса, птиці, морепродуктів, овочів, рису і локшини</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+WOK sauce CHOW MEIN
+imbir i nasiona sezamu
+Światowej klasy mistrz kuchni
+Odkryj zwariowany świat AI-AZJI
+Rozmawiaj z wirtualnym szefem kuchni, generuj obrazy*
+* Treści na stronie zostały wygenerowane przez AI
+140 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Соус WOK CHOW MEIN
+імбир і насіння кунжуту
+Майстер кухні світового класу
+Відкрий шалений світ AI-АЗІЇ
+Спілкуйся з віртуальним шеф-кухарем, генеруй зображення*
+* Вміст на сторінці згенеровано штучним інтелектом
+140 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR5YXJT5" data-category="Sosy WOK">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Sosy WOK</span>
+                  <span class="tag light">B0GR5YXJT5</span>
+                </div>
+                <figure><img src="assets/B0GR5YXJT5.jpg" alt="Pripravka Sos WOK KUNG PAO 140 g z Pieprzem Syczuańskim i Czosnkiem – Sos do Dań Stir-Fry, Kuchnia Azjatycka, Bez Konserwantów, do Mięsa, Drobiu, Owoców Morza i Warzyw" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR5YXJT5</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Sosy WOK</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Sos WOK KUNG PAO 140 g z Pieprzem Syczuańskim i Czosnkiem – Sos do Dań Stir-Fry, Kuchnia Azjatycka, Bez Konserwantów, do Mięsa, Drobiu, Owoców Morza i Warzyw</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-KUNG-Pieprzem-Syczua%C5%84skim-Czosnkiem/dp/B0GR5YXJT5?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Sos WOK KUNG PAO 140 g z Pieprzem Syczuańskim i Czosnkiem – Sos do Dań Stir-Fry, Kuchnia Azjatycka, Bez Konserwantów, do Mięsa, Drobiu, Owoców Morza i Warzyw</td><td class="editable">Pripravka соус WOK KUNG PAO 140 г з сичуанським перцем і часником - соус до страв Stir-Fry, азійська кухня, без консервантів, до м&#x27;яса, птиці, морепродуктів і овочів</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Sos do Dań Stir-Fry, Kuchnia Azjatycka, Bez Konserwantów, do Mięsa, Drobiu, Owoców Morza i Warzyw</td><td class="editable">соус до страв Stir-Fry, азійська кухня, без консервантів, до м&#x27;яса, птиці, морепродуктів і овочів</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+WOK sauce KUNG PAO
+pieprz syczuański i czosnek
+Światowej klasy mistrz kuchni
+Odkryj zwariowany świat AI-AZJI
+Rozmawiaj z wirtualnym szefem kuchni, generuj obrazy*
+* Treści na stronie zostały wygenerowane przez AI
+140 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Соус WOK KUNG PAO
+сичуанський перець і часник
+Майстер кухні світового класу
+Відкрий шалений світ AI-АЗІЇ
+Спілкуйся з віртуальним шеф-кухарем, генеруй зображення*
+* Вміст на сторінці згенеровано штучним інтелектом
+140 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR634TKQ" data-category="Sosy WOK">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Sosy WOK</span>
+                  <span class="tag light">B0GR634TKQ</span>
+                </div>
+                <figure><img src="assets/B0GR634TKQ.jpg" alt="Pripravka Sos WOK PAD THAI z Tamaryndowcem i Imbirem - Autentyczny Smak Kuchni Azjatyckiej, do Makaronu Ryżowego, Mięsa i Warzyw, Bez Konserwantów i Barwników 140g" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR634TKQ</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Sosy WOK</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Sos WOK PAD THAI z Tamaryndowcem i Imbirem - Autentyczny Smak Kuchni Azjatyckiej, do Makaronu Ryżowego, Mięsa i Warzyw, Bez Konserwantów i Barwników 140g</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Sos-THAI-Tamaryndowcem-Imbirem/dp/B0GR634TKQ?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Sos WOK PAD THAI z Tamaryndowcem i Imbirem - Autentyczny Smak Kuchni Azjatyckiej, do Makaronu Ryżowego, Mięsa i Warzyw, Bez Konserwantów i Barwników 140g</td><td class="editable">Pripravka соус WOK PAD THAI з тамариндом і імбиром - автентичний смак азійської кухні, для рисової локшини, м&#x27;яса і овочів, без консервантів і барвників 140 г</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Autentyczny Smak Kuchni Azjatyckiej, do Makaronu Ryżowego, Mięsa i Warzyw, Bez Konserwantów i Barwników 140g</td><td class="editable">автентичний смак азійської кухні, для рисової локшини, м&#x27;яса і овочів, без консервантів і барвників 140 г</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+WOK sauce PAD THAI
+tamarynd i imbir
+Światowej klasy mistrz kuchni
+Odkryj zwariowany świat AI-AZJI
+Rozmawiaj z wirtualnym szefem kuchni, generuj obrazy*
+* Treści na stronie zostały wygenerowane przez AI
+140 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Соус WOK PAD THAI
+тамаринд та імбир
+Майстер кухні світового класу
+Відкрий шалений світ AI-АЗІЇ
+Спілкуйся з віртуальним шеф-кухарем, генеруй зображення*
+* Вміст на сторінці згенеровано штучним інтелектом
+140 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GWD3S8BM" data-category="Sosy WOK">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Sosy WOK</span>
+                  <span class="tag light">B0GWD3S8BM</span>
+                </div>
+                <figure><img src="assets/B0GWD3S8BM.jpg" alt="Pripravka Sos WOK Spicy Hot z Pieprzem Timut i Chili 140 g – Pikantny Sos do Dań Stir-Fry, Mięsa, Owoców Morza, Ryżu i Makaronu, Bez Konserwantów i Barwników" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GWD3S8BM</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Sosy WOK</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Sos WOK Spicy Hot z Pieprzem Timut i Chili 140 g – Pikantny Sos do Dań Stir-Fry, Mięsa, Owoców Morza, Ryżu i Makaronu, Bez Konserwantów i Barwników</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Spicy-Pieprzem-Timut-Chili/dp/B0GWD3S8BM?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Sos WOK Spicy Hot z Pieprzem Timut i Chili 140 g – Pikantny Sos do Dań Stir-Fry, Mięsa, Owoców Morza, Ryżu i Makaronu, Bez Konserwantów i Barwników</td><td class="editable">Pripravka соус WOK гострий з перцем тімут і чилі 140 г - пікантний соус до страв Stir-Fry, м&#x27;яса, морепродуктів, рису і локшини, без консервантів і барвників</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">Pikantny Sos do Dań Stir-Fry, Mięsa, Owoców Morza, Ryżu i Makaronu, Bez Konserwantów i Barwników</td><td class="editable">пікантний соус до страв Stir-Fry, м&#x27;яса, морепродуктів, рису і локшини, без консервантів і барвників</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+WOK sauce SPICY HOT
+pieprz Timut i chili
+Światowej klasy mistrz kuchni
+Odkryj zwariowany świat AI-AZJI
+Rozmawiaj z wirtualnym szefem kuchni, generuj obrazy*
+* Treści na stronie zostały wygenerowane przez AI
+140 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Соус WOK SPICY HOT
+перець Тімут і чилі
+Майстер кухні світового класу
+Відкрий шалений світ AI-АЗІЇ
+Спілкуйся з віртуальним шеф-кухарем, генеруй зображення*
+* Вміст на сторінці згенеровано штучним інтелектом
+140 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR662B45" data-category="Ketchup">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Ketchup</span>
+                  <span class="tag light">B0GR662B45</span>
+                </div>
+                <figure><img src="assets/B0GR662B45.jpg" alt="Pripravka Ketchup Łagodny z Bazylią 250 g – 50% Mniej Cukru, ze Stewią, 168 g Pomidorów na 100 g, z Octem Jabłkowym, Bez Konserwantów i Barwników, Doypack" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR662B45</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Ketchup</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Ketchup Łagodny z Bazylią 250 g – 50% Mniej Cukru, ze Stewią, 168 g Pomidorów na 100 g, z Octem Jabłkowym, Bez Konserwantów i Barwników, Doypack</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Ketchup-%C5%81agodny-Bazyli%C4%85-250/dp/B0GR662B45?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Ketchup Łagodny z Bazylią 250 g – 50% Mniej Cukru, ze Stewią, 168 g Pomidorów na 100 g, z Octem Jabłkowym, Bez Konserwantów i Barwników, Doypack</td><td class="editable">Pripravka кетчуп лагідний з базиліком 250 г - на 50% менше цукру, з стевією, 168 г помідорів на 100 г, з яблучним оцтом, без консервантів і барвників, Doypack</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">50% Mniej Cukru, ze Stewią, 168 g Pomidorów na 100 g, z Octem Jabłkowym, Bez Konserwantów i Barwników, Doypack</td><td class="editable">на 50% менше цукру, з стевією, 168 г помідорів на 100 г, з яблучним оцтом, без консервантів і барвників, Doypack</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Ketchup łagodny
+z bazylią, 50% mniej cukru
+Z octem jabłkowym
+Zobacz lifehacki o jakości ketchupu!
+Bez dodatku konserwantów i barwników
+250 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Кетчуп лагідний
+з базиліком, на 50% менше цукру
+З яблучним оцтом
+Дивись лайфхаки про якість кетчупу!
+Без додавання консервантів і барвників
+250 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR61BRTY" data-category="Ketchup">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Ketchup</span>
+                  <span class="tag light">B0GR61BRTY</span>
+                </div>
+                <figure><img src="assets/B0GR61BRTY.jpg" alt="Pripravka Ketchup Oryginalny z Oliwkami 250 g – 50% Mniej Cukru, z Zielonymi Oliwkami (6,9%), z Octem Jabłkowym, Bez Konserwantów i Barwników, Doypack" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR61BRTY</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Ketchup</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Ketchup Oryginalny z Oliwkami 250 g – 50% Mniej Cukru, z Zielonymi Oliwkami (6,9%), z Octem Jabłkowym, Bez Konserwantów i Barwników, Doypack</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Ketchup-Oryginalny-Oliwkami-250/dp/B0GR61BRTY?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Ketchup Oryginalny z Oliwkami 250 g – 50% Mniej Cukru, z Zielonymi Oliwkami (6,9%), z Octem Jabłkowym, Bez Konserwantów i Barwników, Doypack</td><td class="editable">Pripravka кетчуп оригінальний з оливками 250 г - на 50% менше цукру, з зеленими оливками (6,9%), з яблучним оцтом, без консервантів і барвників, Doypack</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">50% Mniej Cukru, z Zielonymi Oliwkami (6,9%), z Octem Jabłkowym, Bez Konserwantów i Barwników, Doypack</td><td class="editable">на 50% менше цукру, з зеленими оливками (6,9%), з яблучним оцтом, без консервантів і барвників, Doypack</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Ketchup oryginalny
+z oliwkami, 50% mniej cukru
+Z octem jabłkowym
+Zobacz lifehacki o jakości ketchupu!
+Bez dodatku konserwantów i barwników
+250 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Кетчуп оригінальний
+з оливками, на 50% менше цукру
+З яблучним оцтом
+Дивись лайфхаки про якість кетчупу!
+Без додавання консервантів і барвників
+250 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            
+            <article class="product-card" data-asin="B0GR6DLCZF" data-category="Ketchup">
+              <section class="pack">
+                <div class="pack-top">
+                  <span class="tag">Ketchup</span>
+                  <span class="tag light">B0GR6DLCZF</span>
+                </div>
+                <figure><img src="assets/B0GR6DLCZF.jpg" alt="Pripravka Ketchup z Musem Bananowym 200 g – 50% Mniej Cukru, 185 g Pomidorów na 100 g, z Przecierem Bananowym 8% i Jabłkowym, Ocet Jabłkowy, Sól Morska, Bez Konserwantów i Barwników" /></figure>
+                <div class="pack-meta">
+                  <div><span>ASIN</span><strong>B0GR6DLCZF</strong></div>
+                  <div><span>Źródło</span><strong>Amazon.pl</strong></div>
+                  <div><span>Seria</span><strong>Ketchup</strong></div>
+                  <div><span>Obraz</span><strong>lokalny</strong></div>
+                </div>
+              </section>
+              <section class="translation">
+                <div class="card-head">
+                  <h2 class="editable">Pripravka Ketchup z Musem Bananowym 200 g – 50% Mniej Cukru, 185 g Pomidorów na 100 g, z Przecierem Bananowym 8% i Jabłkowym, Ocet Jabłkowy, Sól Morska, Bez Konserwantów i Barwników</h2>
+                  <a class="button" href="https://www.amazon.pl/Pripravka-Ketchup-Musem-Bananowym-200/dp/B0GR6DLCZF?ref_=ast_sto_dp">Amazon</a>
+                </div>
+                <table>
+                  <thead><tr><th>Sekcja</th><th>Polski tekst</th><th>Український переклад</th></tr></thead>
+                  <tbody>
+                    <tr><td class="section-col editable">Amazon title</td><td class="editable">Pripravka Ketchup z Musem Bananowym 200 g – 50% Mniej Cukru, 185 g Pomidorów na 100 g, z Przecierem Bananowym 8% i Jabłkowym, Ocet Jabłkowy, Sól Morska, Bez Konserwantów i Barwników</td><td class="editable">Pripravka кетчуп з банановим мусом 200 г - на 50% менше цукру, 185 г помідорів на 100 г, з банановим пюре 8% і яблучним, яблучний оцет, морська сіль, без консервантів і барвників</td></tr>
+                    <tr><td class="section-col editable">Opis z karty</td><td class="editable">50% Mniej Cukru, 185 g Pomidorów na 100 g, z Przecierem Bananowym 8% i Jabłkowym, Ocet Jabłkowy, Sól Morska, Bez Konserwantów i Barwników</td><td class="editable">на 50% менше цукру, 185 г помідорів на 100 г, з банановим пюре 8% і яблучним, яблучний оцет, морська сіль, без консервантів і барвників</td></tr>
+                    <tr><td class="section-col editable">Kontrola</td><td class="editable">Sprawdzić zgodność Amazon-title, ASIN, serii i zdjęcia opakowania.</td><td class="editable">Перевірити відповідність Amazon-title, ASIN, серії та фото упаковки.</td></tr>
+                  </tbody>
+                </table>
+                <section class="image-ocr">
+                  <h3>OCR з пачки / переклад</h3>
+                  <div class="ocr-grid">
+                    <div class="ocr-box">
+                      <span>Rozpoznany tekst z opakowania</span>
+                      <p class="editable">PRIPRAVKA
+Ketchup
+z przecierem bananowym, 50% mniej cukru
+Bez dodatku konserwantów i barwników
+200 g</p>
+                    </div>
+                    <div class="ocr-box">
+                      <span>Український переклад OCR</span>
+                      <p class="editable">PRIPRAVKA
+Кетчуп
+з банановим пюре, на 50% менше цукру
+Без додавання консервантів і барвників
+200 г</p>
+                    </div>
+                  </div>
+                  <p class="ocr-note editable">Аудит OCR: внесено основні великі написи, видимі на головному фото Amazon. Дуже дрібні службові написи та частина QR-пояснень потребують ручної перевірки у збільшенні.</p>
+                </section>
+              </section>
+            </article>
+            </section>
+      <footer>OCR-блоки сформовані за видимими великими написами на головних фото Amazon. Дрібний службовий текст потребує ручної перевірки у збільшенні. Усі поля таблиць і OCR редагуються та можуть бути експортовані в окремий HTML.</footer>
+    </main>
+    <script>
+      const storageKey = "pripravka-amazon-product-cards-v3";
+      const editableNodes = [...document.querySelectorAll(".editable")];
+      const statusNode = document.querySelector("#status");
+      const editToggle = document.querySelector("#editToggle");
+      function setEditing(enabled) {
+        document.body.classList.toggle("editing", enabled);
+        editableNodes.forEach((node) => { node.contentEditable = String(enabled); node.spellcheck = true; });
+        editToggle.textContent = enabled ? "Вимкнути редагування" : "Увімкнути редагування";
+        statusNode.textContent = enabled ? "Режим редагування" : "Режим перегляду";
+      }
+      function saveEdits() {
+        localStorage.setItem(storageKey, JSON.stringify(editableNodes.map((node) => node.innerHTML)));
+        statusNode.textContent = document.body.classList.contains("editing") ? "Правки збережено" : "Режим перегляду";
+      }
+      function loadEdits() {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return;
+        try {
+          const payload = JSON.parse(raw);
+          editableNodes.forEach((node, index) => { if (typeof payload[index] === "string") node.innerHTML = payload[index]; });
+        } catch { localStorage.removeItem(storageKey); }
+      }
+      function hasCyrillic(text) { return /[А-Яа-яІіЇїЄєҐґ]/.test(text); }
+      function hasPolishSignal(text) { return /[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]|\bPripravka\b|\bNaturalna\b|\bPrzyprawa\b|\bKetchup\b|\bWOK\b/i.test(text); }
+      function hasPolishResidue(text) {
+        const cleaned = text
+          .replace(/PRIPRAVKA/g, "")
+          .replace(/Exclusive Professional/g, "")
+          .replace(/GRILL & BBQ/g, "")
+          .replace(/WOK\s+(ASIAN|CHOW MEIN|KUNG PAO|PAD THAI|SPICY HOT)/g, "");
+        return /\b(z|ze|i|do|bez|na|po|etapów|oczyszczania|Sposoby|przygotowania|naturalna|przyprawa|mieszanka|cukru|kod|dowiedz|więcej|sokiem|pomarańczowym|wędzonymi|pomidorami|musztardą|limonki|liśćmi|żytnim|bekonu|karmelizowanej|cebuli|czosnkiem|kolendrą|bazylią|rozmarynem|lawendą|gorczycy|borowikami|konserwantów|barwników)\b/i.test(cleaned);
+      }
+      function audit() {
+        const cards = [...document.querySelectorAll(".product-card")];
+        const images = [...document.images];
+        const loadedImages = images.filter((img) => img.complete && img.naturalWidth > 0);
+        const tables = [...document.querySelectorAll("table")];
+        const ocrSections = [...document.querySelectorAll(".image-ocr")];
+        const ocrOriginals = [...document.querySelectorAll(".ocr-box:first-child p")];
+        const ocrTranslations = [...document.querySelectorAll(".ocr-box:nth-child(2) p")];
+        const uaCells = [...document.querySelectorAll("tbody td:nth-child(3)")];
+        const empty = editableNodes.filter((node) => node.textContent.trim().length === 0);
+        const missingUa = uaCells.filter((node) => !hasCyrillic(node.textContent));
+        const missingOcrPl = ocrOriginals.filter((node) => !hasPolishSignal(node.textContent));
+        const missingOcrUa = ocrTranslations.filter((node) => !hasCyrillic(node.textContent));
+        const ocrUaWithResidue = ocrTranslations.filter((node) => hasPolishResidue(node.textContent));
+        const uaCellsWithResidue = uaCells.filter((node) => hasPolishResidue(node.textContent));
+        const titleWithoutBrand = [...document.querySelectorAll(".card-head h2")].filter((node) => !/Pripravka/i.test(node.textContent));
+        const items = [
+          ["Картки", cards.length === 39, `Знайдено ${cards.length} з 39.`],
+          ["Зображення", loadedImages.length === images.length && images.length === 39, `Завантажено ${loadedImages.length} з ${images.length} фото.`],
+          ["Таблиці", tables.length === 39, `Знайдено ${tables.length} таблиць PL / UA.`],
+          ["OCR-блоки", ocrSections.length === 39, `Знайдено ${ocrSections.length} OCR-блоків.`],
+          ["OCR PL", missingOcrPl.length === 0, `OCR-блоків без польського сигналу: ${missingOcrPl.length}.`],
+          ["OCR UA", missingOcrUa.length === 0, `OCR-перекладів без кирилиці: ${missingOcrUa.length}.`],
+          ["OCR UA residue", ocrUaWithResidue.length === 0, `OCR-перекладів із польськими залишками: ${ocrUaWithResidue.length}.`],
+          ["Переклад", missingUa.length === 0, `UA-комірок без кирилиці: ${missingUa.length}.`],
+          ["Переклад residue", uaCellsWithResidue.length === 0, `UA-комірок із польськими залишками: ${uaCellsWithResidue.length}.`],
+          ["Порожні поля", empty.length === 0, `Порожніх редагованих полів: ${empty.length}.`],
+          ["Brand у title", titleWithoutBrand.length === 0, `Title без Pripravka: ${titleWithoutBrand.length}.`],
+        ];
+        document.querySelector("#auditList").innerHTML = items.map(([name, ok, text]) => `<li class="${ok ? "ok" : "warn"}"><strong>${ok ? "OK" : "Увага"} - ${name}</strong><span>${text}</span></li>`).join("");
+        statusNode.textContent = items.every(([, ok]) => ok) ? "Аудит пройдено" : "Аудит має попередження";
+      }
+      function exportHtml() {
+        const clone = document.documentElement.cloneNode(true);
+        clone.querySelectorAll("[contenteditable]").forEach((node) => node.removeAttribute("contenteditable"));
+        clone.querySelector("body").classList.remove("editing");
+        const blob = new Blob(["<!doctype html>\n" + clone.outerHTML], { type: "text/html;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "pripravka-amazon-pl-ua-edited.html";
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+      loadEdits(); setEditing(false); audit();
+      window.addEventListener("load", audit);
+      document.querySelectorAll("img").forEach((img) => img.addEventListener("load", audit));
+      editableNodes.forEach((node) => node.addEventListener("input", saveEdits));
+      editToggle.addEventListener("click", () => setEditing(!document.body.classList.contains("editing")));
+      document.querySelector("#runAudit").addEventListener("click", audit);
+      document.querySelector("#exportHtml").addEventListener("click", exportHtml);
+      document.querySelector("#resetEdits").addEventListener("click", () => { localStorage.removeItem(storageKey); location.reload(); });
+    </script>
+  </body>
+</html>
